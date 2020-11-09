@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -29,7 +30,20 @@ public class Demo08ProducerTest {
     @Test
     public void testSyncSend02() throws InterruptedException {
         // 设置发送消息的过期时间为 5000 毫秒
-        this.testSyncSendDelay(5000);
+//        this.testSyncSendDelay(5000);
+        this.testSyncSendDelay();
+    }
+
+    private void testSyncSendDelay() throws InterruptedException {
+        for (int i = 5; i > 0; i--) {
+            Integer delayTime = 1000 * i;
+            producer.syncSend(i, delayTime);
+            logger.info("[testSyncSendDelay][发送编号：[{}] 发送成功]", i);
+            TimeUnit.SECONDS.sleep(1);
+        }
+
+        // 阻塞等待，保证消费
+        new CountDownLatch(1).await();
     }
 
     private void testSyncSendDelay(Integer delay) throws InterruptedException {
